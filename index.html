@@ -19,29 +19,28 @@
             <button class="uk-modal-close-default" type="button" uk-close></button>
             <form>
                 <input id="otp" class="uk-input uk-form-width-medium" type="text" placeholder="Enter OTP">
-                <button class="uk-button uk-button-primary" id="fillotp">Get OTP</button>
+                <button class="uk-button uk-button-primary" id="fillotp">Confirm</button>
             </form>
         </div>
     </div>
-    <center>
-        <div class="uk-card uk-card-body uk-card-default uk-padding uk-width-1-2@m" id="signin-container">
-            <form>
-                <fieldset class="uk-fieldset">
-                    <legend class="uk-legend">Sign In</legend>
-                    <fieldset class="uk-fieldset  uk-padding"><label for="phone">Phone Number</label>
-                        <input id="phone" class="uk-input uk-form-width-medium" type="text"
-                            placeholder="Enter Phone number"></fieldset>
-                    <fieldset class="uk-fieldset  uk-padding"><label for="captcha">Captcha Verification</label>
-                        <div id="captcha"></div>
-                    </fieldset>
-                    <button class="uk-button uk-button-primary" id="signin" uk-toggle="target:#otp-modal"
-                        type="button">Get OTP</button>
+    <div class="uk-card uk-card-body uk-card-default uk-width-1-2@m" id="signin-container">
+        <form>
+            <fieldset class="uk-fieldset">
+                <legend class="uk-legend">Sign In</legend>
+                <fieldset class="uk-fieldset  uk-padding"><label for="phone">Phone Number</label>
+                    <input id="phone" class="uk-input uk-form-width-medium" type="text"
+                        placeholder="Enter Phone number"></fieldset>
+                <fieldset class="uk-fieldset  uk-padding"><label for="captcha">Captcha Verification</label>
+                    <div id="captcha"></div>
                 </fieldset>
+                <button class="uk-button uk-button-primary" id="signin" type="button">Get OTP</button><br>
+                <p></p>
+                <a class="uk-button uk-button-secondary uk-position-bottom ad2hs-prompt">Install</a>
+            </fieldset>
 
-            </form>
-        </div>
-    </center>
-    <a class="ad2hs-prompt" style="display: none;position: absolute;bottom: 1px;width: 100vw;height: 5vh;background: white;color: #0072ff">Add to HomeScreen</a>
+        </form>
+    </div>
+
 
     <!-- Script section -->
     <script src="js/jquery-3.5.1.min.js"></script>
@@ -59,13 +58,19 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
+                // navigator.serviceWorker.register('/sw.js');
+                console.log('Installab;e');
             });
         }
     </script>
 
     <!-- firebase configurations -->
     <script>
+        $(document).ready(function () {
+            if (window.user) {
+                window.location.href = 'html/profile.html';
+            }
+        });
         var firebaseConfig = {
             apiKey: "AIzaSyBfw8psG4Wz7YefnHtSzR4Y76fDx7HTR5E",
             authDomain: "necleavepermissionsystem.firebaseapp.com",
@@ -84,6 +89,7 @@
         });
         $('#signin').click(function (event) {
             event.preventDefault();
+            if (document.querySelector('#phone') === '') alert('Enter phone number!!!');
             let phone = '+91 ' + document.querySelector('#phone').value;
             let appVerifier = window.recaptchaVerifier;
             firebase.auth().useDeviceLanguage();
@@ -92,6 +98,7 @@
                 .then(function (confirmationResult) {
                     window.confirmationResult = confirmationResult;
                     console.log("OTP Sent");
+                    UIkit.modal(document.querySelector('#otp-modal')).show();
                 }).catch(function (error) {
                     alert(error);
                 });
@@ -100,11 +107,11 @@
             event.preventDefault();
             confirmationResult.confirm($('#otp').val()).then(function (result) {
                 // User signed in successfully.
-                var user = result.user;
-                console.log(user);
+                window.user = result.user;
+                location.href = 'html/profile.html'
                 alert("You have logged in and auth is present");
             }).catch(function (error) {
-
+                UIkit.alert()
             });
         });
         let deferredPrompt;
@@ -145,7 +152,7 @@
                     deferredPrompt = null;
 
                 });
-            }
+        }
     </script>
 
 </body>
