@@ -58,8 +58,8 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // navigator.serviceWorker.register('/sw.js');
-                console.log('Installab;e');
+                navigator.serviceWorker.register('/sw.js');
+                console.log('Installable');
             });
         }
     </script>
@@ -93,6 +93,7 @@
             let phone = '+91 ' + document.querySelector('#phone').value;
             let appVerifier = window.recaptchaVerifier;
             firebase.auth().useDeviceLanguage();
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             // console.log(document.querySelector('#phone').value);
             firebase.auth().signInWithPhoneNumber(phone, appVerifier)
                 .then(function (confirmationResult) {
@@ -105,14 +106,27 @@
         });
         $('#fillotp').click(function (event) {
             event.preventDefault();
-            confirmationResult.confirm($('#otp').val()).then(function (result) {
-                // User signed in successfully.
-                window.user = result.user;
-                location.href = 'html/profile.html'
-                alert("You have logged in and auth is present");
-            }).catch(function (error) {
-                UIkit.alert()
-            });
+            // confirmationResult.confirm($('#otp').val()).then(function (result) {
+            //     // User signed in successfully.
+            //     window.user = result.user;
+            //     location.href = 'html/menu.html'
+            //     alert("You have logged in and auth is present");
+            // }).catch(function (error) {
+            //     UIkit.alert()
+            // });
+
+            var credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId,$('#otp').val());
+            firebase.auth().signInWithCredential(credential).then(function(result){
+                console.log(result,credential)
+                location.href = 'html/menu.html'
+            }).catch(function(error){
+                console.log(error)
+            })
+
+        });
+
+        firebase.auth().onAuthStateChanged((user)=>{
+            if (user) window.location.href = 'html/menu.html';
         });
         let deferredPrompt;
 
