@@ -5,15 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu</title>
-    <!-- <link rel="stylesheet" href="../css/style.css"> -->
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/uikit.min.css">
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../css/uikit-rtl.min.css">
 </head>
 
 <body>
-    <h1>Under Development</h1>
 
+    <center>
+
+        <div class="uk-child-width-1-2@s">
+            <div>
+                <div class="uk-card uk-card-default uk-card-large uk-card-body">
+                    <table class="uk-table uk-table-divider uk-table-hover" id="reportTable"></table>
+                    <p></p>
+                    <button class="uk-button uk-button-primary" id="report">Generate report</button>
+                    <button class="uk-button uk-button-primary" id="generate" disabled>Download</button>
+                </div>
+            </div>
+        </div>
+    </center>
 
 
 
@@ -24,6 +36,7 @@
     <script src="../js/uikit.min.js"></script>
     <script src="../js/uikit-icons.min.js"></script>
     <script src="../js/tilt.jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.js"></script>
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
 
@@ -36,7 +49,7 @@
         $(document).ready(function () {
             if (!window.navigator.onLine) window.location.href = '../offline.html';
         });
-        window.addEventListener('offline',()=>{
+        window.addEventListener('offline', () => {
             window.location.href = '../offline.html'
         });
         var firebaseConfig = {
@@ -51,14 +64,54 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         firebase.auth().onAuthStateChanged(function (user) {
-            if (user) console.log(user);
-            else window.location.href = '../index.html';
+            if (user) {
+                window.user = user;
+                console.log(user);
+            } else window.location.href = '../index.html';
         });
 
-        document.querySelector('#signout').addEventListener('click', () => {
-            firebase.auth().signOut();
-        })
+        document.querySelector('#generate').addEventListener('click', (event) => {
+            event.preventDefault();
+            var elt = document.getElementById('reportTable');
+            var wb = XLSX.utils.table_to_book(elt);
+            return XLSX.writeFile(wb,'SheetJSTableExport.' + ('xls'));;
+        });
+        document.querySelector('#report').addEventListener('click', (event) => {
+            event.preventDefault();
+            // console.log('clicked');
+            db.collection('permissions').where('phone', '==', window.user.phoneNumber).get().then(function (
+                    querySnapshot) {
+                    let tableContent = `<thead>
+                                            <tr>
+                                                <th>Register Number</th>
+                                                <th>From Date</th>
+                                                <th>To Date</th>
+                                                <th>Return Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+                    querySnapshot.forEach(function (doc) {
+                        // console.log(doc.data());
+                        tableContent += ` <tr>
+                                            <td>${doc.data().regno}</td>
+                                            <td>${doc.data().from}</td>
+                                            <td>${doc.data().to}</td>
+                                            <td>${doc.data().return}</td>
+                                        </tr>`;
+                    });
+                    tableContent += `</tbody>`;
+                    document.querySelector('#reportTable').innerHTML = tableContent;
+                    document.querySelector('#generate').disabled = false;
+
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                });
+
+
+        });
     </script>
 </body>
 

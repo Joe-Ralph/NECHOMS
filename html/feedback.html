@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu</title>
+    <title>Feedback</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/uikit.min.css">
     <link rel="manifest" href="../manifest.json">
@@ -12,28 +12,24 @@
 </head>
 
 <body>
-    <div class="uk-card uk-card-body uk-card-default uk-width-1-2@m">
-        <form>
-            <fieldset class="uk-fieldset">
-                <legend class="uk-legend">Feedback</legend>
-                <fieldset class="uk-fieldset  uk-padding"><label for="feedback">Enter Your Feed back</label>
-                    <div class="uk-margin">
-                        <textarea class="uk-textarea" rows="5" id="feedback" placeholder="Textarea"></textarea>
-                    </div>
+    <center>
+        <div class="uk-card uk-card-body uk-card-default uk-width-1-2@m">
+            <form>
+                <fieldset class="uk-fieldset">
+                    <legend class="uk-legend">Feedback</legend>
+                    <fieldset class="uk-fieldset  uk-padding">
+                        <div class="uk-margin">
+                            <textarea class="uk-textarea" rows="5" id="feedback" placeholder="Enter your Feedback" style="resize:none"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <button class="uk-button uk-button-primary" id="feed" type="button">submit</button><br>
+                    <p></p>
                 </fieldset>
 
-                <button class="uk-button uk-button-primary" id="feed" type="button">submit</button><br>
-                <p></p>
-            </fieldset>
-
-        </form>
-    </div>
-
-
-
-
-
-
+            </form>
+        </div>
+    </center>
 
     <script src="../js/jquery-3.5.1.min.js"></script>
     <script src="../js/uikit.min.js"></script>
@@ -75,15 +71,19 @@
         document.querySelector('#feed').addEventListener('click', (event) => {
             event.preventDefault();
             let feedback = document.querySelector('#feedback').value;
-            db.collection('feedback').add({
-                phne: firebase.auth().currentUser.phoneNumber,
-                timestamp: Date.now(),
-                message: feedback
-            }).then((obj) => {
-                console.log(obj)
-            }).catch((error) => {
-                console.log(error)
-            })
+            if (feedback == '' || feedback == null) {
+                UIkit.modal.alert('Kindly Fill the Feedback');
+            } else {
+                db.collection('feedback').add({
+                    phone: firebase.auth().currentUser.phoneNumber,
+                    timestamp: Date.now(),
+                    message: feedback
+                }).then((obj) => {
+                    UIkit.modal.alert('FeedBack submitted SuccessFully');
+                }).catch((error) => {
+                    UIkit.modal.alert('Error submitting'+error);
+                })
+            }
         })
     </script>
 </body>

@@ -13,6 +13,25 @@
 </head>
 
 <body>
+    <center>
+        <div class="uk-card uk-card-body uk-card-default uk-width-1-2@m" id="signin-container">
+            <form>
+                <fieldset class="uk-fieldset">
+                    <legend class="uk-legend">Sign In</legend>
+                    <fieldset class="uk-fieldset  uk-padding"><label for="phone">Phone Number</label>
+                        <input id="phone" class="uk-input uk-form-width-medium" type="text"
+                            placeholder="Enter Phone number"></fieldset>
+                    <fieldset class="uk-fieldset  uk-padding"><label for="captcha">Captcha Verification</label>
+                        <div id="captcha"></div>
+                    </fieldset>
+                    <button class="uk-button uk-button-primary" id="signin" type="button">Get OTP</button><br>
+                    <p></p>
+                    <a class="uk-button uk-button-secondary uk-position-bottom ad2hs-prompt">Install</a>
+                </fieldset>
+
+            </form>
+        </div>
+    </center>
     <div id="otp-modal" class="uk-flex-top" uk-modal>
         <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical uk-width-auto">
 
@@ -23,24 +42,6 @@
             </form>
         </div>
     </div>
-    <div class="uk-card uk-card-body uk-card-default uk-width-1-2@m" id="signin-container">
-        <form>
-            <fieldset class="uk-fieldset">
-                <legend class="uk-legend">Sign In</legend>
-                <fieldset class="uk-fieldset  uk-padding"><label for="phone">Phone Number</label>
-                    <input id="phone" class="uk-input uk-form-width-medium" type="text"
-                        placeholder="Enter Phone number"></fieldset>
-                <fieldset class="uk-fieldset  uk-padding"><label for="captcha">Captcha Verification</label>
-                    <div id="captcha"></div>
-                </fieldset>
-                <button class="uk-button uk-button-primary" id="signin" type="button">Get OTP</button><br>
-                <p></p>
-                <a class="uk-button uk-button-secondary uk-position-bottom ad2hs-prompt">Install</a>
-            </fieldset>
-
-        </form>
-    </div>
-
 
     <!-- Script section -->
     <script src="js/jquery-3.5.1.min.js"></script>
@@ -70,6 +71,10 @@
             if (window.user) {
                 window.location.href = 'html/profile.html';
             }
+            Notification.requestPermission(function (status) {
+                if (status == 'denied') UIkit.modal.alert(
+                    'You would not be able to Recieve any notifications regarding holidays.');
+            });
         });
         var firebaseConfig = {
             apiKey: "AIzaSyBfw8psG4Wz7YefnHtSzR4Y76fDx7HTR5E",
@@ -115,17 +120,18 @@
             //     UIkit.alert()
             // });
 
-            var credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId,$('#otp').val());
-            firebase.auth().signInWithCredential(credential).then(function(result){
-                console.log(result,credential)
+            var credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, $(
+                '#otp').val());
+            firebase.auth().signInWithCredential(credential).then(function (result) {
+                console.log(result, credential)
                 location.href = 'html/menu.html'
-            }).catch(function(error){
+            }).catch(function (error) {
                 console.log(error)
             })
 
         });
 
-        firebase.auth().onAuthStateChanged((user)=>{
+        firebase.auth().onAuthStateChanged((user) => {
             if (user) window.location.href = 'html/menu.html';
         });
         let deferredPrompt;
