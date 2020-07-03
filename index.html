@@ -19,14 +19,14 @@
                 <fieldset class="uk-fieldset">
                     <legend class="uk-legend">Sign In</legend>
                     <fieldset class="uk-fieldset  uk-padding"><label for="phone">Phone Number</label>
-                        <input id="phone" class="uk-input uk-form-width-medium" type="text"
+                        <input id="phone" class="uk-input uk-form-width-medium" type="number"
                             placeholder="Enter Phone number"></fieldset>
                     <fieldset class="uk-fieldset  uk-padding"><label for="captcha">Captcha Verification</label>
                         <div id="captcha"></div>
                     </fieldset>
                     <button class="uk-button uk-button-primary" id="signin" type="button">Get OTP</button><br>
                     <p></p>
-                    <a class="uk-button uk-button-secondary uk-position-bottom ad2hs-prompt">Install</a>
+                    <a class="uk-button uk-button-secondary uk-position-bottom" id="a2hs">Install</a>
                 </fieldset>
 
             </form>
@@ -55,11 +55,10 @@
     <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
 
-
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('sw.js');
                 console.log('Installable');
             });
         }
@@ -71,10 +70,10 @@
             if (window.user) {
                 window.location.href = 'html/profile.html';
             }
-            Notification.requestPermission(function (status) {
-                if (status == 'denied') UIkit.modal.alert(
-                    'You would not be able to Recieve any notifications regarding holidays.');
-            });
+            // Notification.requestPermission(function (status) {
+            //     if (status == 'denied') UIkit.modal.alert(
+            //         'You would not be able to Recieve any notifications regarding holidays.');
+            // });
         });
         var firebaseConfig = {
             apiKey: "AIzaSyBfw8psG4Wz7YefnHtSzR4Y76fDx7HTR5E",
@@ -88,6 +87,12 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+
+
+
+
+
+        // recaptcha
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('captcha');
         recaptchaVerifier.render().then(function (widgetId) {
             window.recaptchaWidgetId = widgetId;
@@ -135,44 +140,27 @@
             if (user) window.location.href = 'html/menu.html';
         });
         let deferredPrompt;
-
+        document.querySelector('#a2hs').disabled = true;
         window.addEventListener('beforeinstallprompt', function (e) {
             // Prevent Chrome 67 and earlier from automatically showing the prompt
             e.preventDefault();
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
-
-            showAddToHomeScreen();
+            document.querySelector('#a2hs').disabled = false;
 
         });
-
-        function showAddToHomeScreen() {
-
-            let a2hsBtn = document.querySelector(".ad2hs-prompt");
-
-            a2hsBtn.style.display = "block";
-
-            a2hsBtn.addEventListener("click", addToHomeScreen);
-
-        }
-
-        function addToHomeScreen() {
-            var a2hsBtn = document.querySelector(".ad2hs-prompt"); // hide our user interface that shows our A2HS button
-            a2hsBtn.style.display = 'none'; // Show the prompt
-            deferredPrompt.prompt(); // Wait for the user to respond to the prompt
-            deferredPrompt.userChoice
-                .then(function (choiceResult) {
-
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the A2HS prompt');
-                    } else {
-                        console.log('User dismissed the A2HS prompt');
-                    }
-
-                    deferredPrompt = null;
-
-                });
-        }
+        document.querySelector('#a2hs').addEventListener('click', () => {
+            document.querySelector('#a2hs').disabled = true;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choice) => {
+                if (choice.outcome === 'accepted') {
+                    console.log('User accepted the A2HS prompt');
+                } else {
+                    console.log('User dismissed the A2HS prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
     </script>
 
 </body>

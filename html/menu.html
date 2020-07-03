@@ -55,6 +55,8 @@
     <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-messaging.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-messaging.js"></script> -->
 
 
     <script>
@@ -76,6 +78,66 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+                // messaging/Push Notification
+                const messaging = firebase.messaging();
+        messaging.usePublicVapidKey('BExsunRmSVEvl7BoAIjZoWoKyQhtCCCPBQ5OqgYp94ckBvmsJSe03iv4BUR-IugsVMRXZqvN26g22_UdA4kwvvY');
+
+
+        messaging.getToken().then((currentToken) => {
+            if (currentToken) {
+                console.log(currentToken);
+                var db = firebase.firestore();
+                // Add a new document in collection "cities"
+                firebase.firestore().collection('fcmTokens').doc(currentToken)
+                    .set({
+                        uid: firebase.auth().currentUser.uid
+                    })
+                    .then(function () {
+                        console.log("Token successfully written!");
+                    })
+                    .catch(function (error) {
+                        console.error("Error writing FCMToken: ", error);
+                    });
+                // updateUIForPushEnabled(currentToken);
+            } else {
+                // Show permission request.
+                console.log('No Instance ID token available. Request permission to generate one.');
+                // Show permission UI.
+                // updateUIForPushPermissionRequired();
+                // setTokenSentToServer(false);
+            }
+        }).catch((err) => {
+            // console.log('An error occurred while retrieving token. ', err);
+            UIkit.modal.alert('You would not be able to Recieve any notifications regarding holidays.');
+            // showToken('Error retrieving Instance ID token. ', err);
+            // setTokenSentToServer(false);
+        });
+
+        messaging.onTokenRefresh(() => {
+            messaging.getToken().then((refreshedToken) => {
+                console.log('Token refreshed.');
+                // Indicate that the new Instance ID token has not yet been sent to the
+                // app server.
+                // setTokenSentToServer(false);
+                // Send Instance ID token to app server.
+                var db = firebase.firestore();
+                // Add a new document in collection "cities"
+                firebase.firestore().collection('fcmTokens').doc(currentToken)
+                    .set({
+                        uid: firebase.auth().currentUser.uid
+                    })
+                    .then(function () {
+                        console.log("Token successfully written!");
+                    })
+                    .catch(function (error) {
+                        console.error("Error writing FCMToken: ", error);
+                    });
+                // ...
+            }).catch((err) => {
+                console.log('Unable to retrieve refreshed token ', err);
+                // showToken('Unable to retrieve refreshed token ', err);
+            });
+        });
         firebase.auth().onAuthStateChanged(function (user) {
             if (user) console.log(user);
             else window.location.href = '../index.html';
@@ -84,15 +146,17 @@
         document.querySelector('#signout').addEventListener('click', () => {
             firebase.auth().signOut();
         })
-        document.querySelector('#permit').addEventListener('click',(event)=>{
+        document.querySelector('#permit').addEventListener('click', (event) => {
             location.href = 'permit.html';
         })
-        document.querySelector('#report').addEventListener('click',(event)=>{
+        document.querySelector('#report').addEventListener('click', (event) => {
             location.href = 'report.html';
         })
-        document.querySelector('#feedback').addEventListener('click',(event)=>{
+        document.querySelector('#feedback').addEventListener('click', (event) => {
             location.href = 'feedback.html';
         })
+
+
     </script>
 </body>
 
