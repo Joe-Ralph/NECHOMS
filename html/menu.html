@@ -78,70 +78,83 @@
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-                // messaging/Push Notification
-                const messaging = firebase.messaging();
-        messaging.usePublicVapidKey('BExsunRmSVEvl7BoAIjZoWoKyQhtCCCPBQ5OqgYp94ckBvmsJSe03iv4BUR-IugsVMRXZqvN26g22_UdA4kwvvY');
 
-
-        messaging.getToken().then((currentToken) => {
-            if (currentToken) {
-                console.log(currentToken);
-                var db = firebase.firestore();
-                // Add a new document in collection "cities"
-                firebase.firestore().collection('fcmTokens').doc(currentToken)
-                    .set({
-                        uid: firebase.auth().currentUser.uid
-                    })
-                    .then(function () {
-                        console.log("Token successfully written!");
-                    })
-                    .catch(function (error) {
-                        console.error("Error writing FCMToken: ", error);
-                    });
-                // updateUIForPushEnabled(currentToken);
-            } else {
-                // Show permission request.
-                console.log('No Instance ID token available. Request permission to generate one.');
-                // Show permission UI.
-                // updateUIForPushPermissionRequired();
-                // setTokenSentToServer(false);
-            }
-        }).catch((err) => {
-            // console.log('An error occurred while retrieving token. ', err);
-            UIkit.modal.alert('You would not be able to Recieve any notifications regarding holidays.');
-            // showToken('Error retrieving Instance ID token. ', err);
-            // setTokenSentToServer(false);
-        });
-
-        messaging.onTokenRefresh(() => {
-            messaging.getToken().then((refreshedToken) => {
-                console.log('Token refreshed.');
-                // Indicate that the new Instance ID token has not yet been sent to the
-                // app server.
-                // setTokenSentToServer(false);
-                // Send Instance ID token to app server.
-                var db = firebase.firestore();
-                // Add a new document in collection "cities"
-                firebase.firestore().collection('fcmTokens').doc(currentToken)
-                    .set({
-                        uid: firebase.auth().currentUser.uid
-                    })
-                    .then(function () {
-                        console.log("Token successfully written!");
-                    })
-                    .catch(function (error) {
-                        console.error("Error writing FCMToken: ", error);
-                    });
-                // ...
-            }).catch((err) => {
-                console.log('Unable to retrieve refreshed token ', err);
-                // showToken('Unable to retrieve refreshed token ', err);
-            });
-        });
+        //auth
         firebase.auth().onAuthStateChanged(function (user) {
-            if (user) console.log(user);
-            else window.location.href = '../index.html';
+            if (user) {
+                console.log(user);
+                const messaging = firebase.messaging();
+                messaging.usePublicVapidKey(
+                    'BExsunRmSVEvl7BoAIjZoWoKyQhtCCCPBQ5OqgYp94ckBvmsJSe03iv4BUR-IugsVMRXZqvN26g22_UdA4kwvvY'
+                    );
+
+
+                messaging.getToken().then((currentToken) => {
+                    if (currentToken) {
+                        console.log(currentToken);
+                        var db = firebase.firestore();
+                        // Add a new document in collection "cities"
+                        firebase.firestore().collection('fcmTokens').doc(currentToken)
+                            .set({
+                                uid: firebase.auth().currentUser.uid,
+                                phone: firebase.auth().currentUser.phoneNumber
+                            })
+                            .then(function () {
+                                console.log("Token successfully written!");
+                            })
+                            .catch(function (error) {
+                                console.error("Error writing FCMToken: ", error);
+                            });
+                        // updateUIForPushEnabled(currentToken);
+                    } else {
+                        // Show permission request.
+                        console.log(
+                            'No Instance ID token available. Request permission to generate one.');
+                        // Show permission UI.
+                        // updateUIForPushPermissionRequired();
+                        // setTokenSentToServer(false);
+                    }
+                }).catch((err) => {
+                    console.log('An error occurred while retrieving token. ', err);
+                    UIkit.modal.alert(
+                        'You would not be able to Recieve any notifications regarding holidays.');
+                    // showToken('Error retrieving Instance ID token. ', err);
+                    // setTokenSentToServer(false);
+                });
+
+                messaging.onTokenRefresh(() => {
+                    messaging.getToken().then((refreshedToken) => {
+                        console.log('Token refreshed.');
+                        // Indicate that the new Instance ID token has not yet been sent to the
+                        // app server.
+                        // setTokenSentToServer(false);
+                        // Send Instance ID token to app server.
+                        var db = firebase.firestore();
+                        // Add a new document in collection "cities"
+                        firebase.firestore().collection('fcmTokens').doc(currentToken)
+                            .set({
+                                uid: firebase.auth().currentUser.uid,
+                                phone: firebase.auth().currentUser.phoneNumber
+                            })
+                            .then(function () {
+                                console.log("Token successfully written!");
+                            })
+                            .catch(function (error) {
+                                console.error("Error writing FCMToken: ", error);
+                            });
+                        // ...
+                    }).catch((err) => {
+                        console.log('Unable to retrieve refreshed token ', err);
+                        UIkit.modal.alert(
+                            'You would not be able to Recieve any notifications regarding holidays.'
+                            );
+
+                        // showToken('Unable to retrieve refreshed token ', err);
+                    });
+                });
+            } else window.location.href = '../index.html';
         });
+
 
         document.querySelector('#signout').addEventListener('click', () => {
             firebase.auth().signOut();
@@ -155,8 +168,6 @@
         document.querySelector('#feedback').addEventListener('click', (event) => {
             location.href = 'feedback.html';
         })
-
-
     </script>
 </body>
 
